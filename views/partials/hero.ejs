@@ -1,0 +1,34 @@
+<section id="about" class="py-20 px-6 max-w-6xl mx-auto">
+    <div class="text-center max-w-4xl mx-auto">
+        <span class="px-3.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-full inline-block mb-4">
+            Unified E-Commerce Microservices Engine
+        </span>
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">
+            <%= content.hero_title %>
+        </h1>
+        <p class="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+            <%= content.hero_subtitle %>
+        </p>
+    </div>
+
+    <!-- Deep Solution Explanation -->
+    <div class="mt-16 p-8 rounded-2xl bg-white dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/70 shadow-xl">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Why Build a Unified Ecosystem?</h2>
+        <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+            <%= content.detailed_about %>
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <% if (content.section_features) { %>
+                <% content.section_features.forEach(feat => { %>
+                    <div class="flex items-center gap-3 p-3.5 rounded-lg bg-slate-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200"><%= feat %></span>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</section>

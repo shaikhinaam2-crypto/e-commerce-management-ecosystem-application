@@ -1,0 +1,100 @@
+-- Enable UUID extension for secure, unique identifiers
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Table 1: Landing Page Hero & Core Content
+CREATE TABLE IF NOT EXISTS public_landing_content (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    hero_title VARCHAR(255) NOT NULL,
+    hero_subtitle TEXT NOT NULL,
+    cta_button_text VARCHAR(100) DEFAULT 'Start 14-Day Free Trial',
+    cta_button_link VARCHAR(255) DEFAULT '/signup',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table 2: Video Section Content (Supports YouTube Embeds)
+CREATE TABLE IF NOT EXISTS landing_videos (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    youtube_url VARCHAR(500) NOT NULL,
+    youtube_video_id VARCHAR(100) NOT NULL, -- Extracted video ID (e.g., 'dQw4w9WgXcQ')
+    display_order INT DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table 3: Ecosystem Modules Overview (Showcased on Landing Page)
+CREATE TABLE IF NOT EXISTS landing_module_showcase (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    module_title VARCHAR(150) NOT NULL,
+    short_description TEXT NOT NULL,
+    icon_name VARCHAR(100), -- FontAwesome / Lucide icon identifier
+    badge_tag VARCHAR(50) DEFAULT 'Included in Trial',
+    display_order INT DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Table 4: Dynamic Pricing & Trial Offer Config
+CREATE TABLE IF NOT EXISTS landing_pricing_plans (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    plan_name VARCHAR(100) NOT NULL,
+    price_monthly NUMERIC(10, 2) DEFAULT 0.00,
+    currency VARCHAR(10) DEFAULT 'USD',
+    trial_days INT DEFAULT 14,
+    features_list JSONB NOT NULL, -- Array of feature strings
+    is_popular BOOLEAN DEFAULT FALSE,
+    display_order INT DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Seed Initial Content Data
+INSERT INTO public_landing_content (hero_title, hero_subtitle) 
+VALUES (
+    'All-In-One E-Commerce Operations & Profitability Platform',
+    'Streamline your inventory, resolve courier delivery issues, log monthly expenses, and track real-time net profits in one dynamic ecosystem.'
+);
+
+INSERT INTO landing_videos (title, description, youtube_url, youtube_video_id, display_order)
+VALUES (
+    'Platform Tour & Module Overview',
+    'Watch how our unified suite replaces messy spreadsheets and manual operations across inventory, logistics, and profit calculation.',
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    'dQw4w9WgXcQ',
+    1
+);
+
+INSERT INTO landing_module_showcase (module_title, short_description, icon_name, display_order)
+VALUES 
+('Inventory & Stock Engine', 'Real-time stock level updates, reorder alerts, and supplier purchasing logs.', 'box', 1),
+('Logistics & Delivery Tracker', 'Flag problematic courier orders, manage returns (RTO), and update delivery status.', 'truck', 2),
+('Expense & Revenue Portal', 'Log daily operational expenses, packaging costs, payouts, and revenue streams.', 'wallet', 3),
+('Unit Economics & Profitability', 'Calculate exact daily and monthly net profit accounting for COGS, ads, and delivery fees.', 'trending-up', 4);
+
+INSERT INTO landing_pricing_plans (plan_name, price_monthly, features_list, is_popular)
+VALUES 
+('Starter Trial', 0.00, '["Full access to ALL modules", "14-Day uninterrupted trial", "Unlimited team seats", "No credit card required"]'::jsonb, false),
+('Custom Pro Business', 49.00, '["Selective module access", "Custom team roles & permissions", "Priority logistics & expense logs", "Dedicated database isolation"]'::jsonb, true);
+
+
+-- Updated Table 1: Landing Page Hero & Deep Explanations
+ALTER TABLE public_landing_content 
+ADD COLUMN IF NOT EXISTS section_features JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS detailed_about TEXT;
+
+-- Insert/Update richer explanation data
+UPDATE public_landing_content 
+SET detailed_about = 'Managing an e-commerce brand involves endless spreadsheets, fragmented delivery tracking, and manual calculation of ad spend versus COGS. EcoSuite Ops brings your whole business under one unified digital ecosystem. Work seamlessly across inventory management, courier issue resolution, expense tracking, and real-time net profit calculation without switching tools or manual data entry.',
+    section_features = '["Zero Manual Data Entry", "Isolated Enterprise Security per Module", "Real-Time Net Profit Analytics", "Role-Based Team Access Control"]'::jsonb
+WHERE is_active = TRUE;
+
+-- Updated Table 2: Support Multiple Demo Videos for Each Module
+TRUNCATE TABLE landing_videos;
+
+INSERT INTO landing_videos (title, description, youtube_url, youtube_video_id, display_order)
+VALUES 
+('Ecosystem Overview & Central Shell', 'A complete 5-minute walkthrough showing how independent microservices connect under one dynamic hub with role-based access.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ', 1),
+('Inventory & Stock Engine Demo', 'Learn how automatic stock deduction, low-balance notifications, and supplier purchase orders keep your warehouse running smoothly.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ', 2),
+('Logistics & Delivery Tracker Demo', 'See how courier integration flags delayed orders, tracks customer delivery issues, and cuts down RTO (Return-to-Origin) losses.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ', 3),
+('Unit Economics & Net Profit Dashboard', 'Watch real-time net profit calculations accounting for product costs, packaging, Meta ad spend, and courier fees.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ', 4);

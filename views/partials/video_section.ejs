@@ -1,0 +1,57 @@
+<section id="demo-videos" class="py-16 px-6 bg-slate-100 dark:bg-gray-950 border-y border-gray-200 dark:border-gray-800 transition-colors">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Watch Module Demos</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Explore video walkthroughs of each independent module available during your 14-day trial.</p>
+        </div>
+
+        <!-- Video Selection Selector Tabs -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-8" id="video-tabs">
+            <% videos.forEach((vid, index) => { %>
+                <button 
+                    onclick="switchVideo('<%= vid.youtube_video_id %>', '<%= vid.title %>', '<%= vid.description %>', <%= index %>)" 
+                    id="tab-btn-<%= index %>"
+                    class="video-tab-btn p-4 rounded-xl text-left border transition text-sm font-semibold <%= index === 0 ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:border-blue-500' %>">
+                    <span class="block text-xs uppercase opacity-75 mb-1">Module Video <%= index + 1 %></span>
+                    <%= vid.title %>
+                </button>
+            <% }) %>
+        </div>
+
+        <!-- Active Video Player Frame -->
+        <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl">
+            <h3 id="active-video-title" class="text-xl font-bold text-gray-900 dark:text-white mb-2"><%= videos[0]?.title %></h3>
+            <p id="active-video-desc" class="text-gray-600 dark:text-gray-400 text-sm mb-6"><%= videos[0]?.description %></p>
+            
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-300 dark:border-gray-800 bg-black">
+                <iframe 
+                    id="main-youtube-iframe"
+                    class="absolute top-0 left-0 w-full h-full"
+                    src="https://www.youtube.com/embed/<%= videos[0]?.youtube_video_id %>" 
+                    title="Module Video Player"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function switchVideo(videoId, title, desc, tabIndex) {
+        document.getElementById('main-youtube-iframe').src = 'https://www.youtube.com/embed/' + videoId;
+        document.getElementById('active-video-title').innerText = title;
+        document.getElementById('active-video-desc').innerText = desc;
+
+        // Reset all tab styling
+        const tabs = document.querySelectorAll('.video-tab-btn');
+        tabs.forEach((tab) => {
+            tab.className = 'video-tab-btn p-4 rounded-xl text-left border transition text-sm font-semibold bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:border-blue-500';
+        });
+
+        // Highlight active tab
+        const activeTab = document.getElementById('tab-btn-' + tabIndex);
+        activeTab.className = 'video-tab-btn p-4 rounded-xl text-left border transition text-sm font-semibold bg-blue-600 text-white border-blue-600 shadow-lg';
+    }
+</script>
