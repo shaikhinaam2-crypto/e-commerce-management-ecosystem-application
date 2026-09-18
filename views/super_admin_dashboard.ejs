@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Control Panel - EcoSuite Ops</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 flex h-screen overflow-hidden font-sans">
+
+    <!-- Global Processing Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-xs z-50 flex-col items-center justify-center hidden">
+        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+        <p class="text-xs font-semibold text-slate-600">Loading module data...</p>
+    </div>
+
+    <!-- Slidable Collapsible Sidebar -->
+    <aside id="sidebar" class="w-64 border-r border-slate-200 bg-white flex flex-col justify-between transition-all duration-300 z-20 shrink-0">
+        <div>
+            <!-- Sidebar Header -->
+            <div class="h-16 px-5 border-b border-slate-200 flex items-center justify-between">
+                <span class="sidebar-text text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
+                    Super Admin
+                </span>
+                <button onclick="toggleSidebar()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+
+            <!-- Dynamic Sidebar Navigation Menu -->
+            <nav class="p-3 space-y-1">
+                <button onclick="loadAdminModule('users')" id="menu-btn-users" class="menu-btn w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg border border-blue-200">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="sidebar-text">Users & Organizations</span>
+                </button>
+                
+                <!-- Future module menu items will be added cleanly here -->
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50">
+            <div class="sidebar-text mb-2 text-xs text-slate-500 font-semibold">Master System Access</div>
+            <a href="/logout" class="sidebar-text text-xs text-red-600 font-bold hover:underline">Sign Out</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Workspace -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-50">
+        <!-- Top Navbar -->
+        <header class="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-4">
+                <button id="reopen-btn" onclick="toggleSidebar()" class="hidden p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h1 id="active-header-title" class="text-lg font-bold text-slate-900">Platform Management Hub</h1>
+            </div>
+        </header>
+
+        <!-- Dynamic Module Injector Box -->
+        <div id="module-container" class="p-8 flex-1 overflow-y-auto">
+            <!-- Partial views load dynamically here -->
+        </div>
+    </main>
+
+    <script>
+        // Collapsible Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const reopenBtn = document.getElementById('reopen-btn');
+            const texts = document.querySelectorAll('.sidebar-text');
+
+            if (sidebar.classList.contains('w-64')) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-16');
+                texts.forEach(t => t.classList.add('hidden'));
+                reopenBtn.classList.remove('hidden');
+            } else {
+                sidebar.classList.remove('w-16');
+                sidebar.classList.add('w-64');
+                texts.forEach(t => t.classList.remove('hidden'));
+                reopenBtn.classList.add('hidden');
+            }
+        }
+
+        // Dynamic Component Loader Script
+        async function loadAdminModule(moduleName) {
+            showLoader(true);
+            try {
+                const response = await fetch(`/super-admin/modules/${moduleName}`);
+                const htmlContent = await response.text();
+                
+                // Inject partial HTML into container
+                document.getElementById('module-container').innerHTML = htmlContent;
+
+                // Update Menu Highlighting
+                document.querySelectorAll('.menu-btn').forEach(btn => {
+                    btn.className = 'menu-btn w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg';
+                });
+                const activeBtn = document.getElementById(`menu-btn-${moduleName}`);
+                if (activeBtn) {
+                    activeBtn.className = 'menu-btn w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg border border-blue-200';
+                }
+            } catch (err) {
+                console.error('Error loading module partial:', err);
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        function showLoader(show) {
+            const overlay = document.getElementById('loading-overlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Load Module 1 by default on first render
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAdminModule('users');
+        });
+    </script>
+</body>
+</html>

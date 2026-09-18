@@ -1,0 +1,169 @@
+<section class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">Organization Accounts & Users</h2>
+            <p class="text-xs text-slate-500">Manage trials, active subscriptions, team member roles, and reset access passwords</p>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase text-slate-500">
+                <tr>
+                    <th class="p-4">User & Email</th>
+                    <th class="p-4">Role & Belonging</th>
+                    <th class="p-4">Company Name</th>
+                    <th class="p-4">Account Status</th>
+                    <th class="p-4">Expiry Date</th>
+                    <th class="p-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                <% users.forEach(u => { %>
+                    <tr class="hover:bg-slate-50/50">
+                        <!-- User Name & Email -->
+                        <td class="p-4">
+                            <div class="font-bold text-slate-900"><%= u.full_name %></div>
+                            <div class="text-xs text-slate-500"><%= u.email %></div>
+                        </td>
+
+                        <!-- Role & Owner Link -->
+                        <td class="p-4">
+                            <% if (u.role_name === 'ORG_ADMIN') { %>
+                                <span class="px-2.5 py-0.5 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded">Org Admin</span>
+                            <% } else { %>
+                                <span class="px-2.5 py-0.5 text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded">Org User</span>
+                                <div class="text-[11px] text-slate-400 mt-1">
+                                    Admin: <span class="font-medium text-slate-600"><%= u.org_admin_name || 'N/A' %></span>
+                                </div>
+                            <% } %>
+                        </td>
+
+                        <!-- Company Name -->
+                        <td class="p-4 font-semibold text-slate-800"><%= u.company_name %></td>
+
+                        <!-- Status Badge -->
+                        <td class="p-4">
+                            <% if (u.account_status === 'trial') { %>
+                                <span class="px-2.5 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full">Trial</span>
+                            <% } else if (u.account_status === 'active') { %>
+                                <span class="px-2.5 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full">Active</span>
+                            <% } else { %>
+                                <span class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-full">Expired</span>
+                            <% } %>
+                        </td>
+
+                        <!-- Expiry Date -->
+                        <td class="p-4 text-xs font-medium">
+                            <%= u.trial_ends_at ? new Date(u.trial_ends_at).toLocaleDateString() : 'N/A' %>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="p-4 text-right space-y-1">
+                            
+                            <!-- TRIAL Account Actions -->
+                            <% if (u.account_status === 'trial') { %>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'end_trial')" class="px-2 py-1 text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200 rounded hover:bg-rose-100 transition">End Trial</button>
+                                    <input type="date" id="date-<%= u.organization_id %>" class="px-2 py-1 text-xs border border-slate-300 rounded bg-slate-50 text-slate-800 focus:bg-white">
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'extend_trial')" class="px-2 py-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition">Extend</button>
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'activate')" class="px-2 py-1 text-xs font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700 transition">Activate</button>
+                                </div>
+                            <% } %>
+
+                            <!-- ACTIVE Account Actions -->
+                            <% if (u.account_status === 'active') { %>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'unactivate')" class="px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 rounded hover:bg-slate-200 transition">Deactivate</button>
+                                    <input type="date" id="date-<%= u.organization_id %>" class="px-2 py-1 text-xs border border-slate-300 rounded bg-slate-50 text-slate-800 focus:bg-white">
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'extend_active')" class="px-2 py-1 text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 rounded hover:bg-blue-100 transition">Extend</button>
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'expire')" class="px-2 py-1 text-xs font-semibold bg-rose-600 text-white rounded hover:bg-rose-700 transition">Expire</button>
+                                </div>
+                            <% } %>
+
+                            <!-- EXPIRED Account Actions -->
+                            <% if (u.account_status === 'expired') { %>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <input type="date" id="date-<%= u.organization_id %>" class="px-2 py-1 text-xs border border-slate-300 rounded bg-slate-50 text-slate-800 focus:bg-white">
+                                    <button type="button" onclick="handleAccountAction('<%= u.organization_id %>', 'activate')" class="px-2 py-1 text-xs font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700 transition">Activate</button>
+                                </div>
+                            <% } %>
+
+                            <!-- Password Override -->
+                            <div class="mt-2 text-right">
+                                <button type="button" onclick="promptPasswordReset('<%= u.user_id %>', '<%= u.full_name %>')" class="text-xs text-blue-600 hover:underline font-semibold">Change Password</button>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    async function handleAccountAction(orgId, action) {
+        const dateInput = document.getElementById(`date-${orgId}`);
+        const targetDate = dateInput ? dateInput.value : null;
+
+        // Date check for actions requiring target dates
+        if (['extend_trial', 'activate', 'extend_active'].includes(action) && !targetDate) {
+            alert('Please select a date before clicking this action.');
+            return;
+        }
+
+        if (window.showLoader) window.showLoader(true);
+
+        try {
+            const response = await fetch('/super-admin/update-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orgId, action, targetDate })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                if (window.loadAdminModule) window.loadAdminModule('users');
+            } else {
+                alert(result.error || 'Failed to update organization status.');
+            }
+        } catch (err) {
+            console.error('Action error:', err);
+            alert('A network error occurred while updating the account.');
+        } finally {
+            if (window.showLoader) window.showLoader(false);
+        }
+    }
+
+    async function promptPasswordReset(userId, name) {
+        const newPassword = prompt(`Enter new password for ${name}:`);
+        if (!newPassword) return;
+        if (newPassword.length < 6) {
+            alert('Password must be at least 6 characters.');
+            return;
+        }
+
+        if (window.showLoader) window.showLoader(true);
+
+        try {
+            const response = await fetch('/super-admin/change-user-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, newPassword })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Password updated successfully.');
+            } else {
+                alert('Failed to update password.');
+            }
+        } catch (err) {
+            console.error('Password reset error:', err);
+            alert('A network error occurred.');
+        } finally {
+            if (window.showLoader) window.showLoader(false);
+        }
+    }
+</script>

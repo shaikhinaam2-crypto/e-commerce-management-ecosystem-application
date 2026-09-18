@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= user.companyName %> - Ecosystem Shell</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 flex h-screen overflow-hidden font-sans">
+
+    <!-- Sidebar Navigation Drawer (Light Theme) -->
+    <aside class="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shadow-sm">
+        <div>
+            <!-- Organization Header -->
+            <div class="p-5 border-b border-slate-200">
+                <span class="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Ecosystem Portal</span>
+                <h1 class="text-lg font-bold text-slate-900 truncate"><%= user.companyName %></h1>
+            </div>
+
+            <!-- Dynamic Modules Menu -->
+            <nav class="p-4 space-y-1">
+                <p class="text-[10px] uppercase font-bold text-slate-400 px-3 mb-2">Active Microservices</p>
+                <% modules.forEach((mod) => { %>
+                    <button 
+                        onclick="loadModule('<%= mod.hosted_url %>', '<%= mod.module_name %>')"
+                        class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-700 rounded-lg hover:bg-slate-100 hover:text-blue-600 transition">
+                        <span><%= mod.module_name %></span>
+                        <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200 font-semibold">Trial</span>
+                    </button>
+                <% }) %>
+            </nav>
+        </div>
+
+        <!-- User Profile & Trial Status -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50">
+            <div class="mb-3 p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800">
+                <span class="font-bold">14-Day Trial Active</span>
+                <p class="text-[11px] text-slate-500 mt-0.5">Ends: <%= new Date(user.trialEndsAt).toLocaleDateString() %></p>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+                <div class="truncate mr-2">
+                    <p class="font-bold text-slate-900 truncate"><%= user.fullName %></p>
+                    <p class="text-slate-500 text-[11px]"><%= user.role %></p>
+                </div>
+                <a href="/logout" class="text-red-600 hover:text-red-700 font-semibold shrink-0">Sign Out</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Frame -->
+    <main class="flex-1 flex flex-col bg-slate-50">
+        <!-- Top Bar -->
+        <header class="h-14 border-b border-slate-200 bg-white px-6 flex items-center justify-between shadow-xs">
+            <h2 id="active-module-title" class="text-sm font-bold text-slate-800">
+                Ecosystem Operations Dashboard
+            </h2>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>System Online</span>
+            </div>
+        </header>
+
+        <!-- Webview / Dynamic Module Frame -->
+        <div class="flex-1 relative">
+            <!-- Frame Loader Spinner -->
+            <div id="iframe-loader" class="absolute inset-0 bg-white/90 backdrop-blur-xs z-10 flex flex-col items-center justify-center hidden">
+                <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+                <p class="text-xs font-semibold text-slate-600">Connecting to secure module instance...</p>
+            </div>
+
+            <!-- Default Placeholder View -->
+            <div id="placeholder-view" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-white">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 border border-blue-100">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Select a module from the left menu</h3>
+                <p class="text-slate-500 text-sm max-w-md">Click any module in the navigation panel to instantly load its operational view within your dashboard space.</p>
+            </div>
+
+            <iframe id="module-frame" class="w-full h-full border-0 hidden" onload="hideIframeLoader()"></iframe>
+        </div>
+    </main>
+
+    <script>
+        function loadModule(url, name) {
+            document.getElementById('placeholder-view').classList.add('hidden');
+            document.getElementById('iframe-loader').classList.remove('hidden');
+            document.getElementById('iframe-loader').classList.add('flex');
+            
+            const frame = document.getElementById('module-frame');
+            frame.classList.remove('hidden');
+            frame.src = url;
+            document.getElementById('active-module-title').innerText = name;
+        }
+
+        function hideIframeLoader() {
+            document.getElementById('iframe-loader').classList.add('hidden');
+            document.getElementById('iframe-loader').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
